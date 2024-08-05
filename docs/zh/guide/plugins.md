@@ -23,11 +23,11 @@ const store = createStore({
 })
 ```
 
-### 在插件内提交 Mutation
+## 在插件内提交 Mutation
 
 在插件中不允许直接修改状态——类似于组件，只能通过提交 mutation 来触发变化。
 
-通过提交 mutation，插件可以用来同步数据源到 store。例如，同步 websocket 数据源到 store（下面是个大概例子，实际上 `createPlugin` 方法可以有更多选项来完成复杂任务）：
+通过提交 mutation，插件可以用来同步数据源到 store。例如，同步 websocket 数据源到 store（下面是个大概例子，实际上 `createWebSocketPlugin` 方法可以有更多选项来完成复杂任务）：
 
 ``` js
 export default function createWebSocketPlugin (socket) {
@@ -54,7 +54,7 @@ const store = createStore({
 })
 ```
 
-### 生成 State 快照
+## 生成 State 快照
 
 有时候插件需要获得状态的“快照”，比较改变的前后状态。想要实现这项功能，你需要对状态对象进行深拷贝：
 
@@ -85,14 +85,14 @@ const store = createStore({
 
 上面插件会默认启用。在发布阶段，你需要使用 webpack 的 [DefinePlugin](https://webpack.js.org/plugins/define-plugin/) 或者是 Browserify 的 [envify](https://github.com/hughsk/envify) 使 `process.env.NODE_ENV !== 'production'` 为 `false`。
 
-### 内置 Logger 插件
+## 内置 Logger 插件
 
 Vuex 自带一个日志插件用于一般的调试:
 
 ``` js
-import createLogger from 'vuex/dist/logger'
+import { createLogger } from 'vuex'
 
-const store = new Vuex.Store({
+const store = createStore({
   plugins: [createLogger()]
 })
 ```

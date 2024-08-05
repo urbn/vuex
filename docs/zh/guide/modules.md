@@ -31,7 +31,7 @@ store.state.a // -> moduleA 的状态
 store.state.b // -> moduleB 的状态
 ```
 
-### 模块的局部状态
+## 模块的局部状态
 
 对于模块内部的 mutation 和 getter，接收的第一个参数是**模块的局部状态对象**。
 
@@ -46,7 +46,6 @@ const moduleA = {
       state.count++
     }
   },
-
   getters: {
     doubleCount (state) {
       return state.count * 2
@@ -83,9 +82,9 @@ const moduleA = {
 }
 ```
 
-### 命名空间
+## 命名空间
 
-默认情况下，模块内部的 action 和 mutation 仍然是注册在**全局命名空间**的——这样使得多个模块能够对同一个 action 或 mutation 作出响应。Getter 同样也默认注册在全局命名空间，但是目前这并非出于功能上的目的（仅仅是维持现状来避免非兼容性变更）。必须注意，不要在不同的、无命名空间的模块中定义两个不同的 getter 从而导致错误。
+默认情况下，模块内部的 action 和 mutation 仍然是注册在**全局命名空间**的——这样使得多个模块能够对同一个 action 或 mutation 作出响应。Getter 同样也默认注册在全局命名空间，但是目前这并非出于功能上的目的（仅仅是维持现状来避免非兼容性变更）。必须注意，不要在不同的、无命名空间的模块中定义两个相同的 getter 从而导致错误。
 
 如果希望你的模块具有更高的封装度和复用性，你可以通过添加 `namespaced: true` 的方式使其成为带命名空间的模块。当模块被注册后，它的所有 getter、action 及 mutation 都会自动根据模块注册的路径调整命名。例如：
 
@@ -134,7 +133,7 @@ const store = createStore({
 
 启用了命名空间的 getter 和 action 会收到局部化的 `getter`，`dispatch` 和 `commit`。换言之，你在使用模块内容（module assets）时不需要在同一模块内额外添加空间名前缀。更改 `namespaced` 属性后不需要修改模块内的代码。
 
-#### 在带命名空间的模块内访问全局内容（Global Assets）
+### 在带命名空间的模块内访问全局内容（Global Assets）
 
 如果你希望使用全局 state 和 getter，`rootState` 和 `rootGetters` 会作为第三和第四参数传入 getter，也会通过 `context` 对象的属性传入 action。
 
@@ -151,6 +150,7 @@ modules: {
       someGetter (state, getters, rootState, rootGetters) {
         getters.someOtherGetter // -> 'foo/someOtherGetter'
         rootGetters.someOtherGetter // -> 'someOtherGetter'
+        rootGetters['bar/someOtherGetter'] // -> 'bar/someOtherGetter'
       },
       someOtherGetter: state => { ... }
     },
@@ -161,6 +161,7 @@ modules: {
       someAction ({ dispatch, commit, getters, rootGetters }) {
         getters.someGetter // -> 'foo/someGetter'
         rootGetters.someGetter // -> 'someGetter'
+        rootGetters['bar/someGetter'] // -> 'bar/someGetter'
 
         dispatch('someOtherAction') // -> 'foo/someOtherAction'
         dispatch('someOtherAction', null, { root: true }) // -> 'someOtherAction'
@@ -174,7 +175,7 @@ modules: {
 }
 ```
 
-#### 在带命名空间的模块注册全局 action
+### 在带命名空间的模块注册全局 action
 
 若需要在带命名空间的模块注册全局 action，你可添加 `root: true`，并将这个 action 的定义放在函数 `handler` 中。例如：
 
@@ -200,7 +201,7 @@ modules: {
 }
 ```
 
-#### 带命名空间的绑定函数
+### 带命名空间的绑定函数
 
 当使用 `mapState`、`mapGetters`、`mapActions` 和 `mapMutations` 这些函数来绑定带命名空间的模块时，写起来可能比较繁琐：
 
@@ -209,7 +210,11 @@ computed: {
   ...mapState({
     a: state => state.some.nested.module.a,
     b: state => state.some.nested.module.b
-  })
+  }),
+  ...mapGetters([
+    'some/nested/module/someGetter', // -> this['some/nested/module/someGetter']
+    'some/nested/module/someOtherGetter', // -> this['some/nested/module/someOtherGetter']
+  ])
 },
 methods: {
   ...mapActions([
@@ -226,7 +231,11 @@ computed: {
   ...mapState('some/nested/module', {
     a: state => state.a,
     b: state => state.b
-  })
+  }),
+  ...mapGetters('some/nested/module', [
+    'someGetter', // -> this.someGetter
+    'someOtherGetter', // -> this.someOtherGetter
+  ])
 },
 methods: {
   ...mapActions('some/nested/module', [
@@ -261,7 +270,7 @@ export default {
 }
 ```
 
-#### 给插件开发者的注意事项
+### 给插件开发者的注意事项
 
 如果你开发的[插件（Plugin）](plugins.md)提供了模块并允许用户将其添加到 Vuex store，可能需要考虑模块的空间名称问题。对于这种情况，你可以通过插件的参数对象来允许用户指定空间名称：
 
@@ -277,7 +286,7 @@ export function createPlugin (options = {}) {
 }
 ```
 
-### 模块动态注册
+## 模块动态注册
 
 在 store 创建**之后**，你可以使用 `store.registerModule` 方法注册模块：
 
@@ -290,6 +299,7 @@ const store = createStore({ /* 选项 */ })
 store.registerModule('myModule', {
   // ...
 })
+
 // 注册嵌套模块 `nested/myModule`
 store.registerModule(['nested', 'myModule'], {
   // ...
@@ -304,13 +314,13 @@ store.registerModule(['nested', 'myModule'], {
 
 注意，你可以通过 `store.hasModule(moduleName)` 方法检查该模块是否已经被注册到 store。需要记住的是，嵌套模块应该以数组形式传递给 `registerModule` 和 `hasModule`，而不是以路径字符串的形式传递给 module。
 
-#### 保留 state
+### 保留 state
 
 在注册一个新 module 时，你很有可能想保留过去的 state，例如从一个服务端渲染的应用保留 state。你可以通过 `preserveState` 选项将其归档：`store.registerModule('a', module, { preserveState: true })`。
 
 当你设置 `preserveState: true` 时，该模块会被注册，action、mutation 和 getter 会被添加到 store 中，但是 state 不会。这里假设 store 的 state 已经包含了这个 module 的 state 并且你不希望将其覆写。
 
-### 模块重用
+## 模块重用
 
 有时我们可能需要创建一个模块的多个实例，例如：
 

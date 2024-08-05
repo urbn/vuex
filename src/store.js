@@ -34,16 +34,22 @@ export class Store {
     const { plugins = [], strict = false, devtools } = options;
 
     // store internal state
-    this._committing = false;
-    this._actions = Object.create(null);
-    this._actionSubscribers = [];
-    this._mutations = Object.create(null);
-    this._wrappedGetters = Object.create(null);
-    this._modules = new ModuleCollection(options);
-    this._modulesNamespaceMap = Object.create(null);
-    this._subscribers = [];
-    this._makeLocalGettersCache = Object.create(null);
-    this._devtools = devtools;
+    this._committing = false
+    this._actions = Object.create(null)
+    this._actionSubscribers = []
+    this._mutations = Object.create(null)
+    this._wrappedGetters = Object.create(null)
+    this._modules = new ModuleCollection(options)
+    this._modulesNamespaceMap = Object.create(null)
+    this._subscribers = []
+    this._makeLocalGettersCache = Object.create(null)
+
+    // EffectScope instance. when registering new getters, we wrap them inside
+    // EffectScope so that getters (computed) would not be destroyed on
+    // component unmount.
+    this._scope = null
+
+    this._devtools = devtools
 
     // bind commit and dispatch to self
     const store = this;

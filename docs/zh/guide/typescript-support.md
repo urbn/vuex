@@ -12,7 +12,6 @@ Vuex 没有为 `this.$store` 属性提供开箱即用的类型声明。如果你
 
 ```ts
 // vuex.d.ts
-import { ComponentCustomProperties } from 'vue'
 import { Store } from 'vuex'
 
 declare module '@vue/runtime-core' {
@@ -28,7 +27,7 @@ declare module '@vue/runtime-core' {
 }
 ```
 
-##  `useStore` 组合式函数类型声明
+## `useStore` 组合式函数类型声明
 
 当使用组合式 API 编写 Vue 组件时，您可能希望 `useStore` 返回类型化的 store。为了 `useStore` 能正确返回类型化的 store，必须执行以下步骤：
 
@@ -90,7 +89,6 @@ export default {
 ```
 
 本质上，Vuex 将store 安装到 Vue 应用中使用了 Vue 的 [Provide/Inject](https://v3.cn.vuejs.org/api/composition-api.html#provide-inject) 特性，这就是 injection key 是很重要的因素的原因。
-
 
 ### 简化 `useStore` 用法
 
